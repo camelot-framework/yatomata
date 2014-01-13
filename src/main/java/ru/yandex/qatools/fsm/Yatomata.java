@@ -28,7 +28,7 @@ public interface Yatomata<T> {
     /**
      * Returns the internal FSM instance
      */
-    Object getFSM();
+    T getFSM();
 
     /**
      * Returns the internal FSM class
