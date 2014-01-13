@@ -13,6 +13,31 @@
     <properties>
         <java.version>1.7</java.version>
     </properties>
+
+    <organization>
+        <name>Yandex</name>
+        <url>http://company.yandex.com</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>git@github.com:yandex-qatools/yatomata.git</url>
+        <connection>scm:git:git@github.com:yandex-qatools/yatomata.git</connection>
+        <developerConnection>scm:git:git@github.com:yandex-qatools/yatomata.git</developerConnection>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub Issue Tracker</system>
+        <url>https://github.com/yandex-qatools/yatomata/issues</url>
+    </issueManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -75,17 +100,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <distributionManagement>
-        <repository>
-            <id>yandex_qa_releases</id>
-            <name>Releases</name>
-            <url>${releases-repo}</url>
-        </repository>
-        <snapshotRepository>
-            <id>yandex_qa_snapshots</id>
-            <name>Snapshots</name>
-            <url>${snapshots-repo}</url>
-        </snapshotRepository>
-    </distributionManagement>
 </project>
