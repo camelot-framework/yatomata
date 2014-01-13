@@ -16,7 +16,7 @@ Just add the following dependency to your pom.xml:
     <dependency>
         <groupId>ru.yandex.qatools</groupId>
         <artifactId>yatomata</artifactId>
-        <version>1.2</version>
+        <version>1.3</version>
     </dependency>
 ```
 
@@ -45,13 +45,13 @@ Each transition may also have the `stop` value, defining the final transition (t
 FSM usage example follows:
 
 ```java
-    Engine<MyFSM> engine = new Engine(MyFSM.class, new MyFSM());
+    Yatomata<MyFSM> fsm = new FSMBuilder(MyFSM.class).build();
 
-    engine.getCurrentState();   // returns instance of Stopped
-    engine.isStopped();         // returns false
-    engine.fire(new Run());     // returns instance of Running
-    engine.fire(new Stop());    // returns instance of Stopped
-    engine.isStopped();         // returns true
+    fsm.getCurrentState();   // returns instance of Stopped
+    fsm.isStopped();         // returns false
+    fsm.fire(new Run());     // returns instance of Running
+    fsm.fire(new Stop());    // returns instance of Stopped
+    fsm.isStopped();         // returns true
 
 ```
 
