@@ -9,6 +9,16 @@
         <java.version>1.7</java.version>
     </properties>
 
+    <name>Yandex Yatomata</name>
+    <description>Yet another finite state machine implementation</description>
+    <url>https://github.com/yandex-qatools/yatomata/</url>
+
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
+
     <organization>
         <name>Yandex</name>
         <url>http://company.yandex.com</url>
