@@ -51,6 +51,7 @@ FSM usage example follows:
     fsm.isStopped();         // returns false
     fsm.fire(new Run());     // returns instance of Running
     fsm.fire(new Stop());    // returns instance of Stopped
+    fsm.getFSM();            // returns instance of MyFSM
     fsm.isStopped();         // returns true
 
 ```
