@@ -121,7 +121,7 @@ Example:
 In the example above when `Run` event is caught, there will be the call to the both of the `onBeforeRun` methods.
 But only the first `onRun` method will be invoked.
 
-## FSM implementation examples (see also the [tests](https://github.yandex-team.ru/qafw/biosm/tree/master/src/test/java/ru/yandex/qatools/fsm))
+## FSM implementation examples (see also the [tests](https://github.com/yandex-qatools/yatomata/tree/master/src/test/java/ru/yandex/qatools/fsm))
 
 ### Execute state machine
 
