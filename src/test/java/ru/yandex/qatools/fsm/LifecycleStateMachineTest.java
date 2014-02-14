@@ -38,7 +38,7 @@ public class LifecycleStateMachineTest {
     Yatomata<LifecycleStateMachine> engine;
 
     @Before
-    public void init() {
+    public void init() throws FSMException {
         fsm = mock(LifecycleStateMachine.class);
         engine = new YatomataImpl(LifecycleStateMachine.class, fsm);
     }

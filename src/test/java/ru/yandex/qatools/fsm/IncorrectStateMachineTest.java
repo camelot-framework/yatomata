@@ -36,7 +36,7 @@ public class IncorrectStateMachineTest {
     private YatomataImpl engine;
 
     @Before
-    public void init() {
+    public void init() throws FSMException {
         engine = new YatomataImpl(IncorrectStateMachine.class, new IncorrectStateMachine());
     }
 

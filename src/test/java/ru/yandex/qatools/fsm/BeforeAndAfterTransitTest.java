@@ -51,7 +51,7 @@ public class BeforeAndAfterTransitTest {
     Yatomata<BeforeAndAfterTransitStateMachine> engine;
 
     @Before
-    public void init() {
+    public void init() throws FSMException {
         fsm = mock(BeforeAndAfterTransitStateMachine.class);
         engine = new YatomataImpl(BeforeAndAfterTransitStateMachine.class, fsm);
     }
