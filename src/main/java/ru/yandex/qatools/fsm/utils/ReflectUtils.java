@@ -17,7 +17,7 @@ public class ReflectUtils {
      * Class -> its interfaces -> superclass -> its interfaces -> superclass of a superclass -> ...
      */
     public static List<Class> collectAllSuperclassesAndInterfaces(final Class objClazz) {
-        List<Class> result = new ArrayList<Class>();
+        List<Class> result = new ArrayList<>();
         Class clazz = objClazz;
         // search through superclasses
         while (clazz != null) {
