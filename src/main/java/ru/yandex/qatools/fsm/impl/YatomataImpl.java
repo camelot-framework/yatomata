@@ -2,35 +2,28 @@ package ru.yandex.qatools.fsm.impl;
 
 import ru.yandex.qatools.fsm.StateMachineException;
 import ru.yandex.qatools.fsm.Yatomata;
-import ru.yandex.qatools.fsm.annotations.*;
+import ru.yandex.qatools.fsm.annotations.AfterTransit;
+import ru.yandex.qatools.fsm.annotations.BeforeTransit;
+import ru.yandex.qatools.fsm.annotations.OnTransit;
+import ru.yandex.qatools.fsm.annotations.Transit;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static ru.yandex.qatools.fsm.annotations.Transitions.ANY;
 import static ru.yandex.qatools.fsm.annotations.Transitions.PREVIOUS;
-import static ru.yandex.qatools.fsm.utils.ReflectUtils.*;
+import static ru.yandex.qatools.fsm.impl.Metadata.get;
 
 /**
- * @author: Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author: Ilya Sadykov
  */
 public class YatomataImpl<T> implements Yatomata<T> {
     private final Class<T> fsmClass;
     private Object currentState;
     private boolean completed = false;
     private T fsm;
-    private final FSM fsmConfig;
-    private final Transitions transitions;
-    private final Map<Class<? extends Annotation>, Method[]> annotatedMethods;
-    private final Map<Class, Class[]> superClassesCache;
-
-    @SuppressWarnings("unchecked")
-    private static final Class<? extends Annotation>[] METHOD_ANNOTATIONS = new Class[]{
-            OnTransit.class, BeforeTransit.class, AfterTransit.class
-    };
+    private final Metadata.ClassInfo fsmClassInfo;
 
     /**
      * Constructs the engine with the default state and initialize the new FSM instance
@@ -45,14 +38,8 @@ public class YatomataImpl<T> implements Yatomata<T> {
     public YatomataImpl(Class<T> fsmClass, T fsm) {
         this.fsmClass = fsmClass;
         this.fsm = fsm;
-        this.fsmConfig = fsmClass.getAnnotation(FSM.class);
-        if (fsmConfig == null) {
-            throw new StateMachineException("FSM class must have the @FSM annotation!");
-        }
-        this.currentState = initStartState();
-        transitions = fsmClass.getAnnotation(Transitions.class);
-        annotatedMethods = buildMethodsCache();
-        superClassesCache = buildStateSuperClassesCache();
+        this.fsmClassInfo = get(fsmClass);
+        this.currentState = fsmClassInfo.initStartState(fsm);
     }
 
     /**
@@ -100,6 +87,7 @@ public class YatomataImpl<T> implements Yatomata<T> {
      */
     @Override
     public Object fire(Object event) {
+
         if (completed) {
             throw new StateMachineException("State machine is already completed!");
         }
@@ -111,7 +99,7 @@ public class YatomataImpl<T> implements Yatomata<T> {
         }
 
         // search for the single available transition
-        Transit transit = findSingleTransition(event);
+        Transit transit = fsmClassInfo.findSingleTransition(currentState, event);
 
         // if the transition is not found, ignoring the event
         if (transit == null) {
@@ -122,7 +110,7 @@ public class YatomataImpl<T> implements Yatomata<T> {
 
         // if transition to is not to previous or to the same as before state
         if (!transit.to().equals(PREVIOUS.class) && !transit.to().equals(currentState.getClass())) {
-            newState = initNewState(transit.to(), event);
+            newState = fsmClassInfo.initNewState(fsm, transit.to(), event);
         }
         try {
             invokeTransitionHook(fsm, newState, event, BeforeTransit.class, false);
@@ -136,85 +124,13 @@ public class YatomataImpl<T> implements Yatomata<T> {
         return newState;
     }
 
-    private Object initNewState(Class newStateClass, Object event) {
-        try {
-            final String initStateMethod = getFSMConfig().initStateMethod();
-            if (!isEmpty(initStateMethod)) {
-                for (Method m : getMethodsInClassHierarchy(fsmClass)) {
-                    if (m.getName().equals(initStateMethod)) {
-                        return m.invoke(fsm, newStateClass, event);
-                    }
-                }
-                throw new StateMachineException("Could not find the suitable init state method with name '" +
-                        initStateMethod + "' within the FSM class!");
-            } else {
-                return newStateClass.newInstance();
-            }
-        } catch (Exception e) {
-            throw new StateMachineException("Could not instantiate new state!", e);
-        }
-    }
-
-    private Object initStartState() {
-        return initNewState(getFSMConfig().start(), null);
-    }
-
-    private FSM getFSMConfig() {
-        return fsmConfig;
-    }
-
-    private Map<Class, Class[]> buildStateSuperClassesCache() {
-        Map<Class, Class[]> superclasses = new HashMap<>();
-        addCollectedSuperclasses(superclasses, fsmConfig.start());
-        for (Transit transit : transitions.value()) {
-            addCollectedSuperclasses(superclasses, transit.from());
-            addCollectedSuperclasses(superclasses, transit.to());
-        }
-        return superclasses;
-    }
-
-    private void addCollectedSuperclasses(Map<Class, Class[]> superclasses, Class... stateClass) {
-        for (Class clazz : stateClass) {
-            if (!superclasses.containsKey(clazz)) {
-                final List<Class> classes = collectAllSuperclassesAndInterfaces(clazz);
-                final Class[] classesArray = classes.toArray(new Class[classes.size()]);
-                superclasses.put(clazz, classesArray);
-                addCollectedSuperclasses(superclasses, classesArray);
-            }
-        }
-    }
-
-    private Map<Class<? extends Annotation>, Method[]> buildMethodsCache() {
-        Map<Class<? extends Annotation>, Method[]> annotatedMethods = new HashMap<>();
-        for (Class<? extends Annotation> annClass : METHOD_ANNOTATIONS) {
-            List<Method> methods = new ArrayList<>();
-            for (Method method : getMethodsInClassHierarchy(fsmClass)) {
-                if (method.getAnnotation(annClass) != null) {
-                    methods.add(method);
-                }
-            }
-            annotatedMethods.put(annClass, methods.toArray(new Method[methods.size()]));
-        }
-        return annotatedMethods;
-    }
-
-    private Class[] getSuperClasses(Class clazz) {
-        if (superClassesCache.containsKey(clazz)) {
-            return superClassesCache.get(clazz);
-        }
-        final List<Class> classes = collectAllSuperclassesAndInterfaces(clazz);
-        final Class[] classesArray = new Class[classes.size()];
-        addCollectedSuperclasses(superClassesCache, classesArray);
-        return classes.toArray(classesArray);
-    }
-
     private void invokeTransitionHook(T fsm, Object newState, Object event, Class annotationClass, boolean singleCall)
             throws InvocationTargetException, IllegalAccessException {
         Set<Method> called = new HashSet<>();
-        for (Class oldStateClass : getSuperClasses(currentState.getClass())) {
-            for (Class newStateClass : getSuperClasses(newState.getClass())) {
-                for (Class eventClass : getSuperClasses(event.getClass())) {
-                    for (Method method : annotatedMethods.get(annotationClass)) {
+        for (Class oldStateClass : fsmClassInfo.getSuperClasses(currentState.getClass())) {
+            for (Class newStateClass : fsmClassInfo.getSuperClasses(newState.getClass())) {
+                for (Class eventClass : fsmClassInfo.getSuperClasses(event.getClass())) {
+                    for (Method method : fsmClassInfo.getAnnotatedMethods(annotationClass)) {
                         if (method.getAnnotation(annotationClass) != null && !called.contains(method)) {
                             final Class<?>[] parameterTypes = method.getParameterTypes();
                             // Match the method and invoke if matches
@@ -240,32 +156,5 @@ public class YatomataImpl<T> implements Yatomata<T> {
                 }
             }
         }
-    }
-
-    private Transit findSingleTransition(Object event) {
-        for (Class stateClass : getSuperClasses(currentState.getClass())) {
-            for (Class eventClass : getSuperClasses(event.getClass())) {
-                List<Transit> transits = findTransitions(stateClass, eventClass);
-                if (transits.size() > 1) {
-                    throw new StateMachineException("There's more than 1 transition found!");
-                }
-                if (!transits.isEmpty()) {
-                    return transits.get(0);
-                }
-            }
-        }
-        return null;
-    }
-
-    private List<Transit> findTransitions(Class stateClass, Class eventClass) {
-        List<Transit> transits = new ArrayList<>();
-        for (Transit transit : transitions.value()) {
-            if (containsClass(transit.from(), ANY.class) || containsClass(transit.from(), stateClass)) {
-                if (containsClass(transit.on(), eventClass)) {
-                    transits.add(transit);
-                }
-            }
-        }
-        return transits;
     }
 }

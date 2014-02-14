@@ -3,7 +3,7 @@ package ru.yandex.qatools.fsm.impl;
 import ru.yandex.qatools.fsm.Yatomata;
 
 /**
- * @author: Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author: Ilya Sadykov
  */
 public class FSMBuilder<T> implements Yatomata.Builder<T> {
     final Class<T> fsmClass;

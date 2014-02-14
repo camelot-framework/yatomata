@@ -10,7 +10,7 @@ import ru.yandex.qatools.fsm.beans.*;
 import ru.yandex.qatools.fsm.impl.YatomataImpl;
 
 /**
- * @author: Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author: Ilya Sadykov
  */
 public class IncorrectStateMachineTest {
 
