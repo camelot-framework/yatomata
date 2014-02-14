@@ -37,7 +37,7 @@ public class CompletedCounterStateMachineTest {
     }
 
     @Test
-    public void testAggregateState() {
+    public void testAggregateState() throws FSMException {
         final CompletedCounterStateMachineImpl fsm = new CompletedCounterStateMachineImpl();
         final CompletedCounterState state = new CompletedCounterState();
         Yatomata<CompletedCounterStateMachine> engine = new YatomataImpl(CompletedCounterStateMachine.class, fsm, state);
@@ -48,7 +48,7 @@ public class CompletedCounterStateMachineTest {
     }
 
     @Test
-    public void testAggregateIsCalled() {
+    public void testAggregateIsCalled() throws FSMException {
         CompletedCounterStateMachine fsm = mock(CompletedCounterStateMachine.class);
         final CompletedCounterState state = new CompletedCounterState();
         Yatomata<CompletedCounterStateMachine> engine = new YatomataImpl(CompletedCounterStateMachine.class, fsm, state);

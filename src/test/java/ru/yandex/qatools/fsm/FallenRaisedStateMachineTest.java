@@ -14,6 +14,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author: Ilya Sadykov
@@ -29,26 +30,32 @@ public class FallenRaisedStateMachineTest {
             @Transit(to = TestBrokenState.class, on = TestBroken.class),
             @Transit(to = TestDroppedState.class, on = TestDropped.class, stop = true)
     })
-    public interface FallenRaisedStateMachine {
+    public abstract class FallenRaisedStateMachine implements StopConditionAware<TestState, TestEvent> {
         @OnTransit
-        public void onTestPassed(TestState oldState, TestState newState, TestPassed event);
+        public abstract void onTestPassed(TestState oldState, TestState newState, TestPassed event);
 
         @OnTransit
-        public void onTestBroken(TestState currentState, TestBroken event);
+        public abstract void onTestBroken(TestState currentState, TestBroken event);
 
         @OnTransit
-        public void onTestSkipped(TestState currentState, TestSkipped event);
+        public abstract void onTestSkipped(TestState currentState, TestSkipped event);
 
         @OnTransit
-        public void onTestDropped(TestState state, TestDropped event);
+        public abstract void onTestDropped(TestState state, TestDropped event);
+
+        @Override
+        public boolean isStopRequired(TestState state, TestEvent event) {
+            return state instanceof TestBrokenState;
+        }
     }
 
     FallenRaisedStateMachine fsm;
     Yatomata<FallenRaisedStateMachine> engine;
 
     @Before
-    public void init() {
+    public void init() throws FSMException {
         fsm = mock(FallenRaisedStateMachine.class);
+        when(fsm.isStopRequired(any(TestState.class), any(TestEvent.class))).thenCallRealMethod();
         engine = new YatomataImpl(FallenRaisedStateMachine.class, fsm);
     }
 
@@ -71,6 +78,7 @@ public class FallenRaisedStateMachineTest {
         TestState state = (TestState) engine.fire(event);
         assertTrue("Result must be test broken state", state instanceof TestBrokenState);
         verify(fsm).onTestBroken(any(UndefinedState.class), same(event));
+        assertTrue("FSM must be stopped", engine.isCompleted());
     }
 
     @Test

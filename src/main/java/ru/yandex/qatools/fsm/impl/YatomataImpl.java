@@ -1,5 +1,6 @@
 package ru.yandex.qatools.fsm.impl;
 
+import ru.yandex.qatools.fsm.FSMException;
 import ru.yandex.qatools.fsm.StateMachineException;
 import ru.yandex.qatools.fsm.Yatomata;
 import ru.yandex.qatools.fsm.annotations.AfterTransit;
@@ -28,14 +29,14 @@ public class YatomataImpl<T> implements Yatomata<T> {
     /**
      * Constructs the engine with the default state and initialize the new FSM instance
      */
-    public YatomataImpl(Class<T> fsmClass) throws IllegalAccessException, InstantiationException {
+    public YatomataImpl(Class<T> fsmClass) throws FSMException, IllegalAccessException, InstantiationException {
         this(fsmClass, fsmClass.newInstance());
     }
 
     /**
      * Constructs the engine with the default state and the defined FSM instance
      */
-    public YatomataImpl(Class<T> fsmClass, T fsm) {
+    public YatomataImpl(Class<T> fsmClass, T fsm) throws FSMException {
         this.fsmClass = fsmClass;
         this.fsm = fsm;
         this.fsmClassInfo = get(fsmClass);
@@ -45,7 +46,7 @@ public class YatomataImpl<T> implements Yatomata<T> {
     /**
      * Constructs the engine with the defined state
      */
-    public YatomataImpl(Class<T> fsmClass, T fsm, Object currentState) {
+    public YatomataImpl(Class<T> fsmClass, T fsm, Object currentState) throws FSMException {
         this(fsmClass, fsm);
         this.currentState = currentState;
     }
@@ -106,7 +107,6 @@ public class YatomataImpl<T> implements Yatomata<T> {
             return currentState;
         }
         Object newState = currentState;
-        completed = transit.stop();
 
         // if transition to is not to previous or to the same as before state
         if (!transit.to().equals(PREVIOUS.class) && !transit.to().equals(currentState.getClass())) {
@@ -121,6 +121,7 @@ public class YatomataImpl<T> implements Yatomata<T> {
                     + newState + " on " + event + "!", e);
         }
         currentState = newState;
+        completed = fsmClassInfo.isCompleted(fsm, newState, event, transit.stop());
         return newState;
     }
 

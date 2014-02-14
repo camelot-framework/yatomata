@@ -13,9 +13,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.*;
 
 /**
  * @author: Ilya Sadykov
@@ -31,26 +29,32 @@ public class ExecuteStateMachineTest {
             @Transit(from = Running.class, on = {ProcessCompleted.class, ProcessFailed.class, ProcessTerminated.class}, stop = true),
             @Transit(from = Running.class, on = TerminateProcess.class)
     })
-    public interface ExecuteStateMachine {
+    public abstract class ExecuteStateMachine implements StopConditionAware<ExecuteState, Object> {
         @OnTransit
-        public void onProcessStarted(Idle from, Running to, ProcessStarted event);
+        public abstract void onProcessStarted(Idle from, Running to, ProcessStarted event);
 
         @OnTransit
-        public void onProcessTerminate(Running from, TerminateProcess event);
+        public abstract void onProcessTerminate(Running from, TerminateProcess event);
 
         @OnTransit
-        public void onProcessStartedAtCancelling(Cancelling from, ProcessStarted event);
+        public abstract void onProcessStartedAtCancelling(Cancelling from, ProcessStarted event);
 
         @OnTransit
-        public void onProcessTerminatedAtCancelling(ExecuteState from, ProcessTerminated event);
+        public abstract void onProcessTerminatedAtCancelling(ExecuteState from, ProcessTerminated event);
+
+        @Override
+        public boolean isStopRequired(ExecuteState state, Object event) {
+            return false;
+        }
     }
 
     private ExecuteStateMachine fsm;
     private YatomataImpl engine;
 
     @Before
-    public void init() {
+    public void init() throws FSMException {
         fsm = mock(ExecuteStateMachine.class);
+        when(fsm.isStopRequired(any(ExecuteState.class), any())).thenCallRealMethod();
         engine = new YatomataImpl(ExecuteStateMachine.class, fsm);
     }
 
@@ -94,6 +98,7 @@ public class ExecuteStateMachineTest {
         verify(fsm).onProcessStarted(any(Idle.class), any(Running.class), any(ProcessStarted.class));
         assertTrue("State must be Running", state instanceof Running);
         assertTrue("State must be Running", engine.fire(new Object()) instanceof Running);
+        verify(fsm).isStopRequired(any(Running.class), any(ProcessStarted.class));
         verifyNoMoreInteractions(fsm);
     }
 

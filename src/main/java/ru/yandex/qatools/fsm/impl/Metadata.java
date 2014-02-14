@@ -1,6 +1,8 @@
 package ru.yandex.qatools.fsm.impl;
 
+import ru.yandex.qatools.fsm.FSMException;
 import ru.yandex.qatools.fsm.StateMachineException;
+import ru.yandex.qatools.fsm.StopConditionAware;
 import ru.yandex.qatools.fsm.annotations.*;
 
 import java.lang.annotation.Annotation;
@@ -12,9 +14,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static ru.yandex.qatools.fsm.utils.ReflectUtils.collectAllSuperclassesAndInterfaces;
-import static ru.yandex.qatools.fsm.utils.ReflectUtils.containsClass;
-import static ru.yandex.qatools.fsm.utils.ReflectUtils.getMethodsInClassHierarchy;
+import static ru.yandex.qatools.fsm.utils.ReflectUtils.*;
 
 /**
  * @author: Ilya Sadykov
@@ -28,7 +28,7 @@ class Metadata {
             OnTransit.class, BeforeTransit.class, AfterTransit.class
     };
 
-    public static ClassInfo get(Class fsmClass) {
+    public static ClassInfo get(Class fsmClass) throws FSMException {
         if (!cache.containsKey(fsmClass)) {
             cache.put(fsmClass, new ClassInfo(fsmClass));
         }
@@ -41,6 +41,7 @@ class Metadata {
         private final Transitions transitions;
         private final Map<Class<? extends Annotation>, Method[]> annotatedMethods;
         private final Map<Class, Class[]> superClassesCache;
+        private final boolean stoppedByCondition;
 
         private ClassInfo(Class<T> fsmClass) {
             this.fsmClass = fsmClass;
@@ -51,6 +52,7 @@ class Metadata {
             transitions = fsmClass.getAnnotation(Transitions.class);
             annotatedMethods = buildMethodsCache();
             superClassesCache = buildStateSuperClassesCache();
+            stoppedByCondition = StopConditionAware.class.isAssignableFrom(fsmClass);
         }
 
         public Object initNewState(Object fsm, Class newStateClass, Object event) {
@@ -82,6 +84,13 @@ class Metadata {
 
         public Object initStartState(Object fsm) {
             return initNewState(fsm, fsmConfig.start(), null);
+        }
+
+        public boolean isCompleted(T fsm, Object newState, Object event, boolean stoppedByTransition) {
+            if (stoppedByCondition) {
+                return ((StopConditionAware) fsm).isStopRequired(newState, event) || stoppedByTransition;
+            }
+            return stoppedByTransition;
         }
 
         public Class[] getSuperClasses(Class clazz) {
@@ -156,5 +165,6 @@ class Metadata {
             }
             return annotatedMethods;
         }
+
     }
 }

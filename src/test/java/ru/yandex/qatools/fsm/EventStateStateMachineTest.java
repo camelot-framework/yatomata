@@ -36,7 +36,7 @@ public class EventStateStateMachineTest {
     Yatomata<EventStateStateMachine> engine;
 
     @Before
-    public void init() {
+    public void init() throws FSMException {
         fsm = mock(EventStateStateMachine.class);
         when(fsm.initState(eq(UndefinedEvent.class), (TestEvent) eq(null))).thenReturn(new UndefinedEvent());
         when(fsm.initState(eq(TestStarted.class), any(TestStarted.class))).thenReturn(new TestStarted());
