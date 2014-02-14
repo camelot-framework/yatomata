@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.TYPE;
 
 /**
- * @author: Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author: Ilya Sadykov
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({TYPE})

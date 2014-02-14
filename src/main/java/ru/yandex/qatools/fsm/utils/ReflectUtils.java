@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author: Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author: Ilya Sadykov
  */
 public class ReflectUtils {
 

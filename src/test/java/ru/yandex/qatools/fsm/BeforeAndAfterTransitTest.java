@@ -14,7 +14,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 
 /**
- * @author: Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author: Ilya Sadykov
  */
 
 public class BeforeAndAfterTransitTest {

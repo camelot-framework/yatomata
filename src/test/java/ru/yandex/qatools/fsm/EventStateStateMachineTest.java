@@ -15,7 +15,7 @@ import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.*;
 
 /**
- * @author: Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author: Ilya Sadykov
  */
 
 public class EventStateStateMachineTest {
