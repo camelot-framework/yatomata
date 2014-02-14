@@ -122,6 +122,28 @@ Example:
 In the example above when `Run` event is caught, there will be the call to the both of the `onBeforeRun` methods.
 But only the first `onRun` method will be invoked.
 
+### StopConditionAware interface
+
+If you want to stop your FSM by a custom condition, you can implement the `StopConditionAware` interface with your class and
+then implement the `isStopRequired` method, which accepts a new state object and an incoming event.
+
+```java
+    @FSM(start = Idle.class)
+    @Transitions({
+            @Transit(from = Idle.class, on = Run.class, to = Running.class),
+            @Transit(from = Running.class, on = Stop.class, to = Stopped.class, stop = true),
+    })
+    public class MyFSM implements StopConditionAware<State, Event> {
+
+        boolean isStopRequired(State state, Event event){
+            return event instanceof Stop;
+        }
+    }
+```
+
+**Important!** `isStopRequired` cannot override the true stop condition which is defined by a transition. Thus if your transition
+forces FSM to stop, this condition will be ignored.
+
 ## FSM implementation examples (see also the [tests](https://github.com/yandex-qatools/yatomata/tree/master/src/test/java/ru/yandex/qatools/fsm))
 
 ### Execute state machine
