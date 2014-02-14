@@ -10,5 +10,5 @@ package ru.yandex.qatools.fsm.beans;
 
 import java.io.Serializable;
 
-public class ProcessStarted implements Serializable {
+public class ProcessStarted extends TestState implements Serializable {
 }

@@ -56,22 +56,34 @@ FSM usage example follows:
 
 ```
 
-### Custom `init` method for each state
+### Custom instantiation method for each state
 
-You can define the `initStateMethod` with the signature according to your state and event classes.  This method
-should be unique within the class and it will be used during the instantiation of the new state object. Example:
+You can define the methods with `@NewState` annotation that can be used as state initializers for your states depending
+on the types of the incoming messages. Each method should have two arguments: class of the new state and the incoming event.
+FSM class must have only single @NewState method with the only argument, which will be used to initialize the initial state.
+Example:
 
 ```java
-    @FSM(start = Undefined.class, initStateMethod = "initState")
+    @FSM(start = Undefined.class)
     @Transitions({
             @Transit(from = Undefined.class, to = Started.class, on = Start.class),
+            @Transit(from = Started.class, to = Stopped.class, on = Stop.class),
     })
     public class MyFSM {
 
-        public State initState(Class<? extends State> stateClass, Event event) throws IllegalAccessException, InstantiationException {
-            State res = stateClass.newInstance();
-            res.setEvent(event);
-            return res;
+        @NewState
+        public Started initState(Class<Started> stateClass, Start event) {
+            return new Started();
+        }
+
+        @NewState
+        public Stopped initState(Class<Started> stateClass, Stop event) {
+            return new Stopped();
+        }
+
+        @NewState
+        public Undefined initState(Class<Started> stateClass) {
+            return new Undefined();
         }
     }
 ```

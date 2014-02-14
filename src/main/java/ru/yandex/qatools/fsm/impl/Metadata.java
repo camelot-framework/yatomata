@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static java.lang.String.format;
 import static ru.yandex.qatools.fsm.utils.ReflectUtils.*;
 
 /**
@@ -28,9 +28,9 @@ class Metadata {
             OnTransit.class, BeforeTransit.class, AfterTransit.class
     };
 
-    public static ClassInfo get(Class fsmClass) throws FSMException {
+    public static <T> ClassInfo get(Class<T> fsmClass) throws FSMException {
         if (!cache.containsKey(fsmClass)) {
-            cache.put(fsmClass, new ClassInfo(fsmClass));
+            cache.put(fsmClass, new ClassInfo<>(fsmClass));
         }
         return cache.get(fsmClass);
     }
@@ -40,10 +40,12 @@ class Metadata {
         private final FSM fsmConfig;
         private final Transitions transitions;
         private final Map<Class<? extends Annotation>, Method[]> annotatedMethods;
+        private final Map<Class, Method> initStateMethods;
+        private Method initStartStateMethod;
         private final Map<Class, Class[]> superClassesCache;
         private final boolean stoppedByCondition;
 
-        private ClassInfo(Class<T> fsmClass) {
+        private ClassInfo(Class<T> fsmClass) throws FSMException {
             this.fsmClass = fsmClass;
             this.fsmConfig = fsmClass.getAnnotation(FSM.class);
             if (fsmConfig == null) {
@@ -52,23 +54,24 @@ class Metadata {
             transitions = fsmClass.getAnnotation(Transitions.class);
             annotatedMethods = buildMethodsCache();
             superClassesCache = buildStateSuperClassesCache();
+            initStateMethods = buildInitStatesCache();
             stoppedByCondition = StopConditionAware.class.isAssignableFrom(fsmClass);
         }
 
         public Object initNewState(Object fsm, Class newStateClass, Object event) {
             try {
-                final String initStateMethod = fsmConfig.initStateMethod();
-                if (!isEmpty(initStateMethod)) {
-                    for (Method m : getMethodsInClassHierarchy(fsmClass)) {
-                        if (m.getName().equals(initStateMethod)) {
-                            return m.invoke(fsm, newStateClass, event);
+                if (event != null) {
+                    for (Class cachedEventClass : initStateMethods.keySet()) {
+                        for (Class eventClass : getSuperClasses(event.getClass())) {
+                            if (cachedEventClass.isAssignableFrom(eventClass)) {
+                                return initStateMethods.get(cachedEventClass).invoke(fsm, newStateClass, event);
+                            }
                         }
                     }
-                    throw new StateMachineException("Could not find the suitable init state method with name '" +
-                            initStateMethod + "' within the FSM class!");
-                } else {
-                    return newStateClass.newInstance();
                 }
+                return (initStartStateMethod != null) ?
+                        initStartStateMethod.invoke(fsm, newStateClass) :
+                        newStateClass.newInstance();
             } catch (Exception e) {
                 throw new StateMachineException("Could not instantiate new state!", e);
             }
@@ -130,6 +133,26 @@ class Metadata {
             return transits;
         }
 
+        private Map<Class, Method> buildInitStatesCache() throws FSMException {
+            Map<Class, Method> result = new HashMap<>();
+            for (Method method : getMethodsInClassHierarchy(fsmClass)) {
+                if (method.getAnnotation(NewState.class) != null) {
+                    final Class<?>[] types = method.getParameterTypes();
+                    if (types.length > 1) {
+                        result.put(types[1], method);
+                    } else {
+                        if (initStartStateMethod == null) {
+                            initStartStateMethod = method;
+                        } else {
+                            throw new FSMException(
+                                    format("Failed to use @NewState method %s because FSM is already using %s!",
+                                            method.getName(), initStartStateMethod.getName()));
+                        }
+                    }
+                }
+            }
+            return result;
+        }
 
         private Map<Class, Class[]> buildStateSuperClassesCache() {
             Map<Class, Class[]> superclasses = new HashMap<>();

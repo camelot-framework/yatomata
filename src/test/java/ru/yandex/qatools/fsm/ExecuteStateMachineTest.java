@@ -2,10 +2,7 @@ package ru.yandex.qatools.fsm;
 
 import org.junit.Before;
 import org.junit.Test;
-import ru.yandex.qatools.fsm.annotations.FSM;
-import ru.yandex.qatools.fsm.annotations.OnTransit;
-import ru.yandex.qatools.fsm.annotations.Transit;
-import ru.yandex.qatools.fsm.annotations.Transitions;
+import ru.yandex.qatools.fsm.annotations.*;
 import ru.yandex.qatools.fsm.beans.*;
 import ru.yandex.qatools.fsm.impl.YatomataImpl;
 
@@ -29,7 +26,8 @@ public class ExecuteStateMachineTest {
             @Transit(from = Running.class, on = {ProcessCompleted.class, ProcessFailed.class, ProcessTerminated.class}, stop = true),
             @Transit(from = Running.class, on = TerminateProcess.class)
     })
-    public abstract class ExecuteStateMachine implements StopConditionAware<ExecuteState, Object> {
+    public abstract class ExecuteStateMachine implements StopConditionAware<ExecuteState, Object>
+    {
         @OnTransit
         public abstract void onProcessStarted(Idle from, Running to, ProcessStarted event);
 
@@ -42,6 +40,11 @@ public class ExecuteStateMachineTest {
         @OnTransit
         public abstract void onProcessTerminatedAtCancelling(ExecuteState from, ProcessTerminated event);
 
+        @NewState
+        public ExecuteState initState(Class<? extends ExecuteState> state, TestState event) throws IllegalAccessException, InstantiationException {
+            return state.newInstance();
+        }
+
         @Override
         public boolean isStopRequired(ExecuteState state, Object event) {
             return false;
@@ -52,9 +55,10 @@ public class ExecuteStateMachineTest {
     private YatomataImpl engine;
 
     @Before
-    public void init() throws FSMException {
+    public void init() throws FSMException, InstantiationException, IllegalAccessException {
         fsm = mock(ExecuteStateMachine.class);
         when(fsm.isStopRequired(any(ExecuteState.class), any())).thenCallRealMethod();
+        when(fsm.initState(any(Class.class), any(TestState.class))).thenCallRealMethod();
         engine = new YatomataImpl(ExecuteStateMachine.class, fsm);
     }
 
@@ -93,11 +97,12 @@ public class ExecuteStateMachineTest {
     }
 
     @Test
-    public void testNoTransition() {
+    public void testNoTransition() throws InstantiationException, IllegalAccessException {
         ExecuteState state = (ExecuteState) engine.fire(new ProcessStarted());
         verify(fsm).onProcessStarted(any(Idle.class), any(Running.class), any(ProcessStarted.class));
         assertTrue("State must be Running", state instanceof Running);
         assertTrue("State must be Running", engine.fire(new Object()) instanceof Running);
+        verify(fsm).initState(any(Class.class), any(ProcessStarted.class));
         verify(fsm).isStopRequired(any(Running.class), any(ProcessStarted.class));
         verifyNoMoreInteractions(fsm);
     }
