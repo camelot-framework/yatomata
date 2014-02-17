@@ -77,12 +77,12 @@ Example:
         }
 
         @NewState
-        public Stopped initState(Class<Started> stateClass, Stop event) {
+        public Stopped initState(Class<Stopped> stateClass, Stop event) {
             return new Stopped();
         }
 
         @NewState
-        public Undefined initState(Class<Started> stateClass) {
+        public Undefined initState(Class<Undefined> stateClass) {
             return new Undefined();
         }
     }
