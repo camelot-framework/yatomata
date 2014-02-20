@@ -101,9 +101,9 @@ class Metadata {
                 return superClassesCache.get(clazz);
             }
             final List<Class> classes = collectAllSuperclassesAndInterfaces(clazz);
-            final Class[] classesArray = new Class[classes.size()];
-            addCollectedSuperclasses(superClassesCache, classesArray);
-            return classes.toArray(classesArray);
+            final Class[] superClasses = classes.toArray(new Class[classes.size()]);
+            addCollectedSuperclasses(superClassesCache, superClasses);
+            return superClasses;
         }
 
         public Transit findSingleTransition(Object currentState, Object event) {
