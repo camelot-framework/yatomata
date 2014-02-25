@@ -47,15 +47,29 @@ class Metadata {
 
         private ClassInfo(Class<T> fsmClass) throws FSMException {
             this.fsmClass = fsmClass;
-            this.fsmConfig = fsmClass.getAnnotation(FSM.class);
+            annotatedMethods = buildMethodsCache();
+            superClassesCache = new HashMap<>();
+            initStateMethods = buildInitStatesCache();
+            stoppedByCondition = StopConditionAware.class.isAssignableFrom(fsmClass);
+            this.fsmConfig = findAnnotation(fsmClass, FSM.class);
             if (fsmConfig == null) {
                 throw new StateMachineException("FSM class must have the @FSM annotation!");
             }
-            transitions = fsmClass.getAnnotation(Transitions.class);
-            annotatedMethods = buildMethodsCache();
-            superClassesCache = buildStateSuperClassesCache();
-            initStateMethods = buildInitStatesCache();
-            stoppedByCondition = StopConditionAware.class.isAssignableFrom(fsmClass);
+            transitions = findAnnotation(fsmClass, Transitions.class);
+            if (transitions == null) {
+                throw new StateMachineException("FSM class must have the @Transitions annotation!");
+            }
+            collectStateSuperClassesCache();
+        }
+
+        @SuppressWarnings("unchecked")
+        private <A extends Annotation> A findAnnotation(Class<T> fsmClass, Class<A> aClass) {
+            for (Class clazz : getSuperClasses(fsmClass)) {
+                if (clazz.getAnnotation(aClass) != null) {
+                    return (A) clazz.getAnnotation(aClass);
+                }
+            }
+            return null;
         }
 
         public Object initNewState(Object fsm, Class newStateClass, Object event) {
@@ -154,14 +168,12 @@ class Metadata {
             return result;
         }
 
-        private Map<Class, Class[]> buildStateSuperClassesCache() {
-            Map<Class, Class[]> superclasses = new HashMap<>();
-            addCollectedSuperclasses(superclasses, fsmConfig.start());
+        private void collectStateSuperClassesCache() {
+            addCollectedSuperclasses(superClassesCache, fsmConfig.start());
             for (Transit transit : transitions.value()) {
-                addCollectedSuperclasses(superclasses, transit.from());
-                addCollectedSuperclasses(superclasses, transit.to());
+                addCollectedSuperclasses(superClassesCache, transit.from());
+                addCollectedSuperclasses(superClassesCache, transit.to());
             }
-            return superclasses;
         }
 
         private void addCollectedSuperclasses(Map<Class, Class[]> superclasses, Class... stateClass) {
