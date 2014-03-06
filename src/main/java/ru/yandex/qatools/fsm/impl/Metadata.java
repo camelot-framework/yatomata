@@ -17,7 +17,7 @@ import static java.lang.String.format;
 import static ru.yandex.qatools.fsm.utils.ReflectUtils.*;
 
 /**
- * @author: Ilya Sadykov
+ * @author Ilya Sadykov
  */
 class Metadata {
 

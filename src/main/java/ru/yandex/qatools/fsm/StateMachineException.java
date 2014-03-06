@@ -1,7 +1,7 @@
 package ru.yandex.qatools.fsm;
 
 /**
- * @author: Ilya Sadykov
+ * @author Ilya Sadykov
  */
 public class StateMachineException extends RuntimeException {
     public StateMachineException(String message) {

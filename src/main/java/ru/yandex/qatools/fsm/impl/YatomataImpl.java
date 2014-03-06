@@ -17,7 +17,7 @@ import static ru.yandex.qatools.fsm.annotations.Transitions.PREVIOUS;
 import static ru.yandex.qatools.fsm.impl.Metadata.get;
 
 /**
- * @author: Ilya Sadykov
+ * @author Ilya Sadykov
  */
 public class YatomataImpl<T> implements Yatomata<T> {
     private final Class<T> fsmClass;

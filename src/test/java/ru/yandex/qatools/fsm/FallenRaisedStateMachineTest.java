@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * @author: Ilya Sadykov
+ * @author Ilya Sadykov
  */
 
 public class FallenRaisedStateMachineTest {

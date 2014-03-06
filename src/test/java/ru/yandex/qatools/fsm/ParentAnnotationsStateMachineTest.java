@@ -14,7 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
- * @author: Ilya Sadykov
+ * @author Ilya Sadykov
  */
 public class ParentAnnotationsStateMachineTest {
 

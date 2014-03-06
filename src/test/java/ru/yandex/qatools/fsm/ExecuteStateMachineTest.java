@@ -13,7 +13,7 @@ import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.*;
 
 /**
- * @author: Ilya Sadykov
+ * @author Ilya Sadykov
  */
 public class ExecuteStateMachineTest {
 
