@@ -1,7 +1,7 @@
 package ru.yandex.qatools.fsm;
 
 /**
- * @author: Ilya Sadykov (mailto: smecsia@yandex-team.ru)
+ * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
 public class FSMException extends Exception {
 

@@ -3,7 +3,7 @@ package ru.yandex.qatools.fsm;
 /**
  * Implement this interface to force Yatomata verify if the FSM completion is required
  *
- * @author: Ilya Sadykov
+ * @author Ilya Sadykov
  */
 public interface StopConditionAware<State, Event> {
 

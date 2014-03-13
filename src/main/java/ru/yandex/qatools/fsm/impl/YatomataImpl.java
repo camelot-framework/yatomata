@@ -3,21 +3,17 @@ package ru.yandex.qatools.fsm.impl;
 import ru.yandex.qatools.fsm.FSMException;
 import ru.yandex.qatools.fsm.StateMachineException;
 import ru.yandex.qatools.fsm.Yatomata;
-import ru.yandex.qatools.fsm.annotations.AfterTransit;
-import ru.yandex.qatools.fsm.annotations.BeforeTransit;
-import ru.yandex.qatools.fsm.annotations.OnTransit;
-import ru.yandex.qatools.fsm.annotations.Transit;
+import ru.yandex.qatools.fsm.annotations.*;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collection;
 
+import static java.lang.String.format;
 import static ru.yandex.qatools.fsm.annotations.Transitions.PREVIOUS;
 import static ru.yandex.qatools.fsm.impl.Metadata.get;
 
 /**
- * @author: Ilya Sadykov
+ * @author Ilya Sadykov
  */
 public class YatomataImpl<T> implements Yatomata<T> {
     private final Class<T> fsmClass;
@@ -112,50 +108,32 @@ public class YatomataImpl<T> implements Yatomata<T> {
         if (!transit.to().equals(PREVIOUS.class) && !transit.to().equals(currentState.getClass())) {
             newState = fsmClassInfo.initNewState(fsm, transit.to(), event);
         }
+        final BestMatchedAnnotatedMethodCaller caller = new BestMatchedAnnotatedMethodCaller(fsm, fsmClassInfo);
+        boolean completeTransition = false;
         try {
-            invokeTransitionHook(fsm, newState, event, BeforeTransit.class, false);
-            invokeTransitionHook(fsm, newState, event, OnTransit.class, true);
-            invokeTransitionHook(fsm, newState, event, AfterTransit.class, false);
-        } catch (Exception e) {
-            throw new StateMachineException("Could not invoke transition callback method from " + currentState + " to "
-                    + newState + " on " + event + "!", e);
-        }
-        currentState = newState;
-        completed = fsmClassInfo.isCompleted(fsm, newState, event, transit.stop());
-        return newState;
-    }
-
-    private void invokeTransitionHook(T fsm, Object newState, Object event, Class annotationClass, boolean singleCall)
-            throws InvocationTargetException, IllegalAccessException {
-        Set<Method> called = new HashSet<>();
-        for (Class oldStateClass : fsmClassInfo.getSuperClasses(currentState.getClass())) {
-            for (Class newStateClass : fsmClassInfo.getSuperClasses(newState.getClass())) {
-                for (Class eventClass : fsmClassInfo.getSuperClasses(event.getClass())) {
-                    for (Method method : fsmClassInfo.getAnnotatedMethods(annotationClass)) {
-                        if (method.getAnnotation(annotationClass) != null && !called.contains(method)) {
-                            final Class<?>[] parameterTypes = method.getParameterTypes();
-                            // Match the method and invoke if matches
-                            if (parameterTypes.length == 3 && parameterTypes[0].equals(oldStateClass) &&
-                                    parameterTypes[1].equals(newStateClass) && parameterTypes[2].equals(eventClass)) {
-                                method.invoke(fsm, currentState, newState, event);
-                                called.add(method);
-                            } else if (parameterTypes.length == 2 && parameterTypes[0].equals(oldStateClass) && parameterTypes[1].equals(eventClass)) {
-                                method.invoke(fsm, currentState, event);
-                                called.add(method);
-                            } else if (parameterTypes.length == 2 && parameterTypes[0].equals(newStateClass) && parameterTypes[1].equals(eventClass)) {
-                                method.invoke(fsm, newState, event);
-                                called.add(method);
-                            } else if (parameterTypes.length == 1 && parameterTypes[0].equals(eventClass)) {
-                                method.invoke(fsm, event);
-                                called.add(method);
-                            }
-                        }
-                        if (singleCall && called.size() > 0) {
-                            return;
-                        }
-                    }
+            caller.call(BeforeTransit.class, false, currentState, newState, event);
+            caller.call(OnTransit.class, true, currentState, newState, event);
+            caller.call(AfterTransit.class, false, currentState, newState, event);
+            completeTransition = true;
+        } catch (Throwable e) {
+            try {
+                Collection<Method> called;
+                for (Method m : called = caller.call(OnException.class, true, e, currentState, newState, event)) {
+                    completeTransition = completeTransition || (m.getAnnotation(OnException.class).preserve());
                 }
+                if (called.isEmpty()) {
+                    throw new StateMachineException(format("Could not invoke transition callback method " +
+                            "with FSM %s  (%s) -> (%s) on %s!", fsm, currentState, newState, event), e);
+                }
+            } catch (Throwable onE) {
+                throw new StateMachineException(format("Could not invoke the @OnException method for FSM %s " +
+                        "while trying to transit (%s) -> (%s) on %s!", fsm, currentState, newState, event), e);
             }
         }
+        if (completeTransition) {
+            currentState = newState;
+        }
+        completed = fsmClassInfo.isCompleted(fsm, newState, event, transit.stop());
+        return currentState;
     }
 }

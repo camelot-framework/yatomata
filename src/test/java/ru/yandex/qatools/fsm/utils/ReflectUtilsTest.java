@@ -12,7 +12,7 @@ import static ru.yandex.qatools.fsm.utils.ReflectUtils.collectAllSuperclassesAnd
 import static ru.yandex.qatools.fsm.utils.ReflectUtils.containsClass;
 
 /**
- * @author: Ilya Sadykov
+ * @author Ilya Sadykov
  */
 public class ReflectUtilsTest {
 

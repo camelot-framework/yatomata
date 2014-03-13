@@ -3,7 +3,7 @@ package ru.yandex.qatools.fsm;
 /**
  * Implement this interface to force Yatomata use your own method to initialize the new state object
  *
- * @author: Ilya Sadykov
+ * @author Ilya Sadykov
  */
 public interface InitStateAware<State, Event> {
 

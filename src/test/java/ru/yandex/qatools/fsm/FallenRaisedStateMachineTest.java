@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * @author: Ilya Sadykov
+ * @author Ilya Sadykov
  */
 
 public class FallenRaisedStateMachineTest {
@@ -56,7 +56,7 @@ public class FallenRaisedStateMachineTest {
     public void init() throws FSMException {
         fsm = mock(FallenRaisedStateMachine.class);
         when(fsm.isStopRequired(any(TestState.class), any(TestEvent.class))).thenCallRealMethod();
-        engine = new YatomataImpl(FallenRaisedStateMachine.class, fsm);
+        engine = new YatomataImpl<>(FallenRaisedStateMachine.class, fsm);
     }
 
     @Test

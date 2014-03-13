@@ -13,7 +13,7 @@ import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.*;
 
 /**
- * @author: Ilya Sadykov
+ * @author Ilya Sadykov
  */
 public class ExecuteStateMachineTest {
 
@@ -59,7 +59,7 @@ public class ExecuteStateMachineTest {
         fsm = mock(ExecuteStateMachine.class);
         when(fsm.isStopRequired(any(ExecuteState.class), any())).thenCallRealMethod();
         when(fsm.initState(any(Class.class), any(TestState.class))).thenCallRealMethod();
-        engine = new YatomataImpl(ExecuteStateMachine.class, fsm);
+        engine = new YatomataImpl<>(ExecuteStateMachine.class, fsm);
     }
 
     @Test

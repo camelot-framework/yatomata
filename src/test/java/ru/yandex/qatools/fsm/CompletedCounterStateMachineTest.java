@@ -15,7 +15,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 /**
- * @author: Ilya Sadykov
+ * @author Ilya Sadykov
  */
 public class CompletedCounterStateMachineTest {
 
@@ -40,7 +40,7 @@ public class CompletedCounterStateMachineTest {
     public void testAggregateState() throws FSMException {
         final CompletedCounterStateMachineImpl fsm = new CompletedCounterStateMachineImpl();
         final CompletedCounterState state = new CompletedCounterState();
-        Yatomata<CompletedCounterStateMachine> engine = new YatomataImpl(CompletedCounterStateMachine.class, fsm, state);
+        Yatomata<CompletedCounterStateMachine> engine = new YatomataImpl<>(CompletedCounterStateMachine.class, fsm, state);
         for (int i = 0; i < 10; ++i) {
             engine.fire(new TestCompletionInfo());
         }
@@ -51,7 +51,7 @@ public class CompletedCounterStateMachineTest {
     public void testAggregateIsCalled() throws FSMException {
         CompletedCounterStateMachine fsm = mock(CompletedCounterStateMachine.class);
         final CompletedCounterState state = new CompletedCounterState();
-        Yatomata<CompletedCounterStateMachine> engine = new YatomataImpl(CompletedCounterStateMachine.class, fsm, state);
+        Yatomata<CompletedCounterStateMachine> engine = new YatomataImpl<>(CompletedCounterStateMachine.class, fsm, state);
 
         final TestCompletionInfo event = new TestCompletionInfo();
         engine.fire(event);

@@ -17,7 +17,7 @@ import static java.lang.String.format;
 import static ru.yandex.qatools.fsm.utils.ReflectUtils.*;
 
 /**
- * @author: Ilya Sadykov
+ * @author Ilya Sadykov
  */
 class Metadata {
 
@@ -25,7 +25,7 @@ class Metadata {
 
     @SuppressWarnings("unchecked")
     private static final Class<? extends Annotation>[] METHOD_ANNOTATIONS = new Class[]{
-            OnTransit.class, BeforeTransit.class, AfterTransit.class
+            OnTransit.class, BeforeTransit.class, AfterTransit.class, OnException.class
     };
 
     public static <T> ClassInfo get(Class<T> fsmClass) throws FSMException {
