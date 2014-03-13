@@ -56,38 +56,6 @@ FSM usage example follows:
 
 ```
 
-### Custom instantiation method for each state
-
-You can define the methods with `@NewState` annotation that can be used as state initializers for your states depending
-on the types of the incoming messages. Each method should have two arguments: class of the new state and the incoming event.
-FSM class must have only single @NewState method with the only argument, which will be used to initialize the initial state.
-Example:
-
-```java
-    @FSM(start = Undefined.class)
-    @Transitions({
-            @Transit(from = Undefined.class, to = Started.class, on = Start.class),
-            @Transit(from = Started.class, to = Stopped.class, on = Stop.class),
-    })
-    public class MyFSM {
-
-        @NewState
-        public Started initState(Class<Started> stateClass, Start event) {
-            return new Started();
-        }
-
-        @NewState
-        public Stopped initState(Class<Stopped> stateClass, Stop event) {
-            return new Stopped();
-        }
-
-        @NewState
-        public Undefined initState(Class<Undefined> stateClass) {
-            return new Undefined();
-        }
-    }
-```
-
 ### Hook methods
 
 You can declare the three types of the hook methods within the FSM class.
@@ -133,6 +101,75 @@ Example:
 
 In the example above when `Run` event is caught, there will be the call to the both of the `onBeforeRun` methods.
 But only the first `onRun` method will be invoked.
+
+### Custom instantiation method for each state
+
+You can define the methods with `@NewState` annotation that can be used as state initializers for your states depending
+on the types of the incoming messages. Each method should have two arguments: class of the new state and the incoming event.
+FSM class must have only single @NewState method with the only argument, which will be used to initialize the initial state.
+Example:
+
+```java
+    @FSM(start = Undefined.class)
+    @Transitions({
+            @Transit(from = Undefined.class, to = Started.class, on = Start.class),
+            @Transit(from = Started.class, to = Stopped.class, on = Stop.class),
+    })
+    public class MyFSM {
+
+        @NewState
+        public Started initState(Class<Started> stateClass, Start event) {
+            return new Started();
+        }
+
+        @NewState
+        public Stopped initState(Class<Stopped> stateClass, Stop event) {
+            return new Stopped();
+        }
+
+        @NewState
+        public Undefined initState(Class<Undefined> stateClass) {
+            return new Undefined();
+        }
+    }
+```
+
+### Superclasses annotations
+
+You can implement your own class hierarchy according to your preference. All the annotated methods and class annotations
+within superclasses will be inherited by their derived classes.
+
+### Exception handling
+
+Yatomata allows you to implement the methods annotated with `@OnException` annotation. Such methods will be used as the
+exception handlers for your FSM. This ability allows you to skip the try-catch blocks declaration within every transition
+hook method.
+Example:
+
+```java
+    @FSM(start = Quotient.class)
+    @Transitions({
+            @Transit(on = Denominator.class),
+    })
+    public class MyFSM {
+
+        @OnTransit
+        public void divide(Quotient quotient, Denominator denominator) {
+            quotient.setValue(quotient.getValue() / denominator.getValue());
+        }
+
+        @OnException(preserve = true)
+        public void onArithmeticException(ArithmeticException e, Quotient from, Quotient to, Denominator den) {
+            logger.info("Failed to perform the division", e);
+        }
+    }
+```
+The `preserve` attribute (defaults to false) indicates if the transition still must be performed even if the exception
+is thrown.
+
+**Important!**  All the declared `@OnException` methods, whose signature matches the occurred exception, will be called
+when exception is thrown. Thus if you declare the method accepting the `Throwable` as an argument, it will be called
+upon each occurring error.
 
 ### StopConditionAware interface
 
