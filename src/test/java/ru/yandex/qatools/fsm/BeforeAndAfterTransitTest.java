@@ -12,6 +12,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
  * @author Ilya Sadykov
@@ -44,7 +45,7 @@ public class BeforeAndAfterTransitTest {
         public void afterTransit(TestState state, TestEvent event);
 
         @OnTransit
-        public void onTestComplete(TestStartedState oldState, TestEvent event);
+        public void onTestComplete(TestCompletedState newState, TestEvent event);
     }
 
     BeforeAndAfterTransitStateMachine fsm;
@@ -53,7 +54,7 @@ public class BeforeAndAfterTransitTest {
     @Before
     public void init() throws FSMException {
         fsm = mock(BeforeAndAfterTransitStateMachine.class);
-        engine = new YatomataImpl(BeforeAndAfterTransitStateMachine.class, fsm);
+        engine = new YatomataImpl<>(BeforeAndAfterTransitStateMachine.class, fsm);
     }
 
     @Test
@@ -73,8 +74,10 @@ public class BeforeAndAfterTransitTest {
         inOrder.verify(fsm).beforeTransit(same(eventSkipped));
         inOrder.verify(fsm).beforeTransit(any(TestCompletedState.class), same(eventSkipped));
         inOrder.verify(fsm).beforeTransit(any(TestStartedState.class), any(TestCompletedState.class), same(eventSkipped));
-        inOrder.verify(fsm).onTestComplete(any(TestStartedState.class), same(eventSkipped));
+        inOrder.verify(fsm).onTestComplete(any(TestCompletedState.class), same(eventSkipped));
         inOrder.verify(fsm).afterTransit(same(eventSkipped));
         inOrder.verify(fsm).afterTransit(any(TestCompletedState.class), same(eventSkipped));
+
+        verifyNoMoreInteractions(fsm);
     }
 }

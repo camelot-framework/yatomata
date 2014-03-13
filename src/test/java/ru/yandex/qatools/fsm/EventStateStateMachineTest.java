@@ -45,7 +45,7 @@ public class EventStateStateMachineTest {
         when(fsm.initNewState(eq(UndefinedEvent.class))).thenReturn(new UndefinedEvent());
         when(fsm.initState(eq(TestStarted.class), any(TestStarted.class))).thenReturn(new TestStarted());
         when(fsm.initState(eq(TestFailed.class), any(TestFailed.class))).thenReturn(new TestFailed());
-        engine = new YatomataImpl(EventStateStateMachine.class, fsm);
+        engine = new YatomataImpl<>(EventStateStateMachine.class, fsm);
     }
 
     @Test

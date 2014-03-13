@@ -39,7 +39,7 @@ public class TestsCountByDayAggregatorTest {
     @Before
     public void init() throws FSMException {
         fsm = mock(TestsCountByDayAggregator.class);
-        engine = new YatomataImpl(TestsCountByDayAggregator.class, fsm);
+        engine = new YatomataImpl<>(TestsCountByDayAggregator.class, fsm);
     }
 
     @Test
