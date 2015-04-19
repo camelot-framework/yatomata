@@ -8,7 +8,7 @@ public interface Yatomata<T> {
     /**
      * Builder to build the fsm instance
      */
-    public static interface Builder<T> {
+    interface Builder<T> {
         /**
          * Build the fsm with the defined initial state
          */

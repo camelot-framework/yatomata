@@ -26,8 +26,7 @@ public class ExecuteStateMachineTest {
             @Transit(from = Running.class, on = {ProcessCompleted.class, ProcessFailed.class, ProcessTerminated.class}, stop = true),
             @Transit(from = Running.class, on = TerminateProcess.class)
     })
-    public abstract class ExecuteStateMachine implements StopConditionAware<ExecuteState, Object>
-    {
+    public abstract class ExecuteStateMachine implements StopConditionAware<ExecuteState, Object> {
         @OnTransit
         public abstract void onProcessStarted(Idle from, Running to, ProcessStarted event);
 
