@@ -20,7 +20,7 @@ public class BestMatchedAnnotatedMethodCaller {
         this.instance = instance;
     }
 
-    public Collection<Method> call(Class<? extends Annotation> annClass, boolean singleCall, Object ... params) throws Throwable {
+    public Collection<Method> call(Class<? extends Annotation> annClass, boolean singleCall, Object... params) throws Throwable {
         final List<Class<?>> paramTypes = new ArrayList<>();
         final List<Object> paramList = new ArrayList<>();
         for (Object value : params) {

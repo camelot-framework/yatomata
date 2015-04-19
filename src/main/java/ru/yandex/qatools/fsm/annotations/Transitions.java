@@ -13,11 +13,23 @@ import static java.lang.annotation.ElementType.TYPE;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({TYPE})
 public @interface Transitions {
+
+    /**
+     * A list of available transitions for this FSM
+     * <pre>
+     * <code>
+     * {@literal @}Transitions({
+     *     {@literal @}Transit(from = State1.class, on = Event1.class, to = State2.class),
+     *     {@literal @}Transit(from = State2.class, on = Event2.class, to = State3.class)
+     * })
+     * </code>
+     * </pre>
+     */
     Transit[] value();
 
-    static final class ANY implements Serializable {
+    final class ANY implements Serializable {
     }
 
-    static final class PREVIOUS implements Serializable {
+    final class PREVIOUS implements Serializable {
     }
 }

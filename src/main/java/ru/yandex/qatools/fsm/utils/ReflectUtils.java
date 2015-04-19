@@ -22,7 +22,7 @@ public class ReflectUtils {
         // search through superclasses
         while (clazz != null) {
             result.add(clazz);
-            for(Class iface : clazz.getInterfaces()){
+            for (Class iface : clazz.getInterfaces()) {
                 result.addAll(collectAllSuperclassesAndInterfaces(iface));
             }
             clazz = clazz.getSuperclass();

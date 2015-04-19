@@ -7,6 +7,9 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.METHOD;
 
 /**
+ * Marks method as post-transition handler that is executed right after transition. See {@link OnTransit} for method
+ * signature examples.
+ *
  * @author Ilya Sadykov
  */
 @Retention(RetentionPolicy.RUNTIME)
