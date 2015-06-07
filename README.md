@@ -1,5 +1,5 @@
 # Yatomata
-[![release](http://github-release-version.herokuapp.com/github/camelot-framework/yatomata/release.svg?style=flat)](https://github.com/camelot-framework/yatomata/releases/latest) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/ru.yandex.qatools.fsm/yatomata/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/ru.yandex.qatools.fsm/yatomata) [![SonarQube](https://img.shields.io/sonar/http/sonar.qatools.ru/ru.yandex.qatools.fsm:yatomata:master/coverage.svg?style=flat)](http://sonar.qatools.ru/dashboard/index/556)
+[![release](http://github-release-version.herokuapp.com/github/camelot-framework/yatomata/release.svg?style=flat)](https://github.com/camelot-framework/yatomata/releases/latest) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/ru.yandex.qatools/yatomata/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/ru.yandex.qatools/yatomata) [![SonarQube](https://img.shields.io/sonar/http/sonar.qatools.ru/ru.yandex.qatools:yatomata:master/coverage.svg?style=flat)](http://sonar.qatools.ru/dashboard/index/556)
 =============
 
 Yet Another auTomata (finite state machine implementation in java).
