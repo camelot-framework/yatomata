@@ -17,7 +17,7 @@ Just add the following dependency to your pom.xml:
     <dependency>
         <groupId>ru.yandex.qatools</groupId>
         <artifactId>yatomata</artifactId>
-        <version>1.6</version>
+        <version>1.7</version>
     </dependency>
 ```
 
