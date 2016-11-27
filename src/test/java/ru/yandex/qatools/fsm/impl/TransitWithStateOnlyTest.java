@@ -1,8 +1,10 @@
-package ru.yandex.qatools.fsm;
+package ru.yandex.qatools.fsm.impl;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
+import ru.yandex.qatools.fsm.FSMException;
+import ru.yandex.qatools.fsm.Yatomata;
 import ru.yandex.qatools.fsm.annotations.*;
 import ru.yandex.qatools.fsm.beans.*;
 import ru.yandex.qatools.fsm.impl.YatomataImpl;

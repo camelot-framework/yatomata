@@ -10,7 +10,7 @@ import java.util.*;
 /**
  * @author Ilya Sadykov (mailto: smecsia@yandex-team.ru)
  */
-public class BestMatchedAnnotatedMethodCaller {
+class BestMatchedAnnotatedMethodCaller {
 
     private final Object instance;
     private final Metadata.ClassInfo cache;
