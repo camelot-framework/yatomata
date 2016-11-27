@@ -1,4 +1,4 @@
-package ru.yandex.qatools.fsm;
+package ru.yandex.qatools.fsm.impl;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,6 +13,8 @@ import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import ru.yandex.qatools.fsm.FSMException;
+import ru.yandex.qatools.fsm.Yatomata;
 
 /**
  * @author Ilya Sadykov

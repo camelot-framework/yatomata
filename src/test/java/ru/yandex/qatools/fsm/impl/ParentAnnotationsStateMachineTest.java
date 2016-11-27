@@ -1,6 +1,8 @@
-package ru.yandex.qatools.fsm;
+package ru.yandex.qatools.fsm.impl;
 
 import org.junit.Test;
+import ru.yandex.qatools.fsm.FSMException;
+import ru.yandex.qatools.fsm.Yatomata;
 import ru.yandex.qatools.fsm.annotations.FSM;
 import ru.yandex.qatools.fsm.annotations.OnTransit;
 import ru.yandex.qatools.fsm.annotations.Transit;

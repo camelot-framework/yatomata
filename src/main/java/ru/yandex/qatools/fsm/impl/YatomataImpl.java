@@ -15,7 +15,7 @@ import static ru.yandex.qatools.fsm.impl.Metadata.get;
 /**
  * @author Ilya Sadykov
  */
-public class YatomataImpl<T> implements Yatomata<T> {
+class YatomataImpl<T> implements Yatomata<T> {
     private final Class<T> fsmClass;
     private Object currentState;
     private boolean completed = false;
