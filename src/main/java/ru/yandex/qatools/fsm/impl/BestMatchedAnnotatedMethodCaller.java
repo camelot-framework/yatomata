@@ -20,16 +20,34 @@ class BestMatchedAnnotatedMethodCaller {
         this.instance = instance;
     }
 
-    public Collection<Method> call(Class<? extends Annotation> annClass, boolean singleCall, Object... params) throws Throwable {
+    public Collection<Method> call(Class<? extends Annotation> annClass, boolean singleCall, ParametersProvider parametersProvider) throws Throwable {
+        try {
+            final HashSet<Method> called = new HashSet<>();
+            callMethodsWithAnnotatedParameters(annClass, parametersProvider, called);
+            call(annClass, parametersProvider.provide(), singleCall, called);
+            return called;
+        } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+            throw (e.getCause() != null) ? e.getCause() : e;
+        }
+    }
+
+    private void callMethodsWithAnnotatedParameters(Class<? extends Annotation> annClass, ParametersProvider parametersProvider, Set<Method> called) throws Throwable {
+        for (Method method : cache.getAnnotatedMethods(annClass)) {
+            List<Object> params = parametersProvider.provide(method);
+            if (!params.isEmpty()) {
+                callMethod(method, params, called);
+            }
+        }
+    }
+
+    private void call(Class<? extends Annotation> annClass, List<Object> params, boolean singleCall, Set<Method> called) throws Throwable {
         final List<Class<?>> paramTypes = new ArrayList<>();
         final List<Object> paramList = new ArrayList<>();
         for (Object value : params) {
             paramTypes.add(value.getClass());
             paramList.add(value);
         }
-        final HashSet<Method> called = new HashSet<>();
         call(annClass, paramTypes, paramList, new Stack<Class<?>>(), singleCall, called);
-        return called;
     }
 
     private void call(Class<? extends Annotation> annClass,
@@ -41,22 +59,18 @@ class BestMatchedAnnotatedMethodCaller {
         if (params.isEmpty()) {
             throw new FSMException("Failed to invoke methods annotated with @" + annClass + ": parameters are empty!");
         }
-        try {
-            if (typesStack.size() >= paramTypes.size()) {
+        if (typesStack.size() >= paramTypes.size()) {
+            findSuitableMethodAndCall(annClass, paramTypes, params, typesStack, singleCall, called);
+        } else {
+            final int pIdx = typesStack.size() > 0 ? typesStack.size() : 0;
+            for (Class clazz : cache.getSuperClasses(paramTypes.get(pIdx))) {
+                typesStack.push(clazz);
                 findSuitableMethodAndCall(annClass, paramTypes, params, typesStack, singleCall, called);
-            } else {
-                final int pIdx = typesStack.size() > 0 ? typesStack.size() : 0;
-                for (Class clazz : cache.getSuperClasses(paramTypes.get(pIdx))) {
-                    typesStack.push(clazz);
-                    findSuitableMethodAndCall(annClass, paramTypes, params, typesStack, singleCall, called);
-                    typesStack.pop();
-                    if (!called.isEmpty() && singleCall) {
-                        return;
-                    }
+                typesStack.pop();
+                if (!called.isEmpty() && singleCall) {
+                    return;
                 }
             }
-        } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-            throw (e.getCause() != null) ? e.getCause() : e;
         }
     }
 
@@ -96,12 +110,17 @@ class BestMatchedAnnotatedMethodCaller {
 
     private void callMethod(Method method, List<Class<?>> types, List<Object> params, Set<Method> called) throws IllegalAccessException, InvocationTargetException {
         if (types.size() == method.getParameterTypes().length) {
-            if (!called.contains(method)) {
-                method.invoke(instance, params.toArray(new Object[types.size()]));
-                called.add(method);
-            }
+            callMethod(method, params, called);
         }
     }
+
+    private void callMethod(Method method, List<Object> params, Set<Method> called) throws IllegalAccessException, InvocationTargetException {
+        if (!called.contains(method)) {
+            method.invoke(instance, params.toArray(new Object[method.getParameterTypes().length]));
+            called.add(method);
+        }
+    }
+
 
     private boolean checkMethodParams(List<Class> paramTypes, List<Class<?>> types) {
         if (types.size() > paramTypes.size()) {

@@ -111,14 +111,14 @@ class YatomataImpl<T> implements Yatomata<T> {
         final BestMatchedAnnotatedMethodCaller caller = new BestMatchedAnnotatedMethodCaller(fsm, fsmClassInfo);
         boolean completeTransition = false;
         try {
-            caller.call(BeforeTransit.class, false, event, currentState, newState, event);
-            caller.call(OnTransit.class, true, event, currentState, newState, event);
-            caller.call(AfterTransit.class, false, event, currentState, newState, event);
+            caller.call(BeforeTransit.class, false, new ParametersProvider(currentState, newState, event));
+            caller.call(OnTransit.class, true, new ParametersProvider(currentState, newState, event));
+            caller.call(AfterTransit.class, false, new ParametersProvider(currentState, newState, event));
             completeTransition = true;
         } catch (Throwable e) {
             try {
                 Collection<Method> called;
-                for (Method m : called = caller.call(OnException.class, true, e, currentState, newState, event)) {
+                for (Method m : called = caller.call(OnException.class, true, new ParametersProvider(e, currentState, newState, event))) {
                     completeTransition = completeTransition || (m.getAnnotation(OnException.class).preserve());
                 }
                 if (called.isEmpty()) {
