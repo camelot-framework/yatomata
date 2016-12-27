@@ -42,11 +42,16 @@ public class FSMBuilder<T> implements Yatomata.Builder<T> {
         try {
             T inst = (instance != null) ? instance : fsmClass.newInstance(); 
             if (state == null) {
-                return new YatomataImpl<>(fsmClass, inst);
+                return new YatomataImpl<>(getFsmClass(), inst);
             }
-            return new YatomataImpl<>(fsmClass, inst, state);
+            return new YatomataImpl<>(getFsmClass(), inst, state);
         } catch (Exception e) {
-            throw new RuntimeException("Could not initialize the FSM Engine for FSM " + fsmClass, e);
+            throw new RuntimeException("Could not initialize the FSM Engine for FSM " + getFsmClass(), e);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Class<T> getFsmClass() {
+        return (instance != null) ? (Class<T>) instance.getClass() : fsmClass;
     }
 }
