@@ -83,7 +83,7 @@ public class BestMatchedAnnotatedMethodCallerTest {
         ConcreteEvent event = mock(ConcreteEvent.class);
         Object param = mock(Object.class);
 
-        caller.call(OnException.class, false, state, event, param);
+        caller.call(OnException.class, false, new ParametersProvider(state, event, param));
         InOrder inOrder = inOrder(obj);
         inOrder.verify(obj).mConcreteEventObject(event, param);
         inOrder.verify(obj).mBaseStateConcreteEvent(state, event);
@@ -101,7 +101,7 @@ public class BestMatchedAnnotatedMethodCallerTest {
         ConcreteEvent event = mock(ConcreteEvent.class);
         Object param = mock(Object.class);
 
-        caller.call(OnException.class, true, state, event, param);
+        caller.call(OnException.class, true, new ParametersProvider(state, event, param));
         verify(obj).mConcreteEventObject(event, param);
         verifyNoMoreInteractions(obj);
     }
@@ -114,7 +114,7 @@ public class BestMatchedAnnotatedMethodCallerTest {
         BaseEvent event = mock(BaseEvent.class);
         Object param = mock(Object.class);
 
-        caller.call(OnException.class, true, state, event, param);
+        caller.call(OnException.class, true, new ParametersProvider(state, event, param));
         verify(obj).mBaseStateBaseEventObject(state, event, param);
         verifyNoMoreInteractions(obj);
     }
@@ -126,7 +126,7 @@ public class BestMatchedAnnotatedMethodCallerTest {
         ConcreteState state = mock(ConcreteState.class);
         ConcreteEvent event = mock(ConcreteEvent.class);
 
-        caller.call(OnException.class, true, state, event);
+        caller.call(OnException.class, true, new ParametersProvider(state, event, null));
         verify(obj).mConcreteStateConcreteEvent(state, event);
         verifyNoMoreInteractions(obj);
     }

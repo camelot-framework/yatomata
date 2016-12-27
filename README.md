@@ -17,7 +17,7 @@ Just add the following dependency to your pom.xml:
     <dependency>
         <groupId>ru.yandex.qatools</groupId>
         <artifactId>yatomata</artifactId>
-        <version>1.7</version>
+        <version>1.9</version>
     </dependency>
 ```
 
@@ -102,6 +102,25 @@ Example:
 
 In the example above when `Run` event is caught, there will be the call to the both of the `onBeforeRun` methods.
 But only the first `onRun` method will be invoked.
+
+### Method parameter annotations
+
+Sometimes you may want to explicitly specify arguments injection order. To do this you can use parameter annotations: ```@FromState```, ```@ToState``` and ```@Event```. For example:
+```
+    @FSM(start = Idle.class)
+    @Transitions({
+            @Transit(from = Idle.class, on = Run.class, to = Running.class)
+    })
+    public class MyFSM {
+        @OnTransit
+        public void onRun(@ToState Running to, @Event Run event, @FromState Idle from){}
+
+        @OnException
+        public void onRun(Exception e, @Event Run event){}
+
+    }
+```
+There's no need to place annotations on exception parameter - it's always injected automatically.
 
 ### Custom instantiation method for each state
 
